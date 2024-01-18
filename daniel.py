@@ -96,12 +96,17 @@ def make_settings(root):
     settings = tk.Toplevel(root)
     settings.bind('<KeyPress>', handle_keypress)
     settings.title("Settings")
-    settings_canvas = tk.Canvas(settings, width=500, height=500)
 
-    settings_canvas.create_text(250, 50, text="Ants")
-    # make button to quit simulation
+    settings_canvas = tk.Canvas(settings, width=500, height=500)
+    settings_canvas.create_text(250, 50, text="Parameters")
+
+    # make slider for number of ants
+    num_ants = tk.Scale(settings, from_=0, to=500, orient=tk.HORIZONTAL, label="Number of ants", length=200, width=20, sliderlength=20, troughcolor="gray")
+    num_ants.place(x=100, y=100)
+
     quit_button = tk.Button(settings, text="Quit", command=root.destroy)
     quit_button.place(x=100, y=400)
+
     settings_canvas.pack()
 
 
