@@ -93,6 +93,7 @@ def handle_keypress(event,):
         root.destroy()
 
 def make_settings(root):
+    slider_length = 200
     settings = tk.Toplevel(root)
     settings.bind('<KeyPress>', handle_keypress)
     settings.title("Settings")
@@ -100,9 +101,35 @@ def make_settings(root):
     settings_canvas = tk.Canvas(settings, width=500, height=500)
     settings_canvas.create_text(250, 50, text="Parameters")
 
-    # make slider for number of ants
-    num_ants = tk.Scale(settings, from_=0, to=500, orient=tk.HORIZONTAL, label="Number of ants", length=200, width=20, sliderlength=20, troughcolor="gray")
-    num_ants.place(x=100, y=100)
+    # make input for number of ants
+    ants_label = tk.Label(settings, text="Number of ants:")
+    ants_label.place(x=50, y=100)
+    ants_input = tk.Entry(settings)
+    ants_input.place(x=200, y=100)
+
+    # make input for number of foods
+    foods_label = tk.Label(settings, text="Number of foods:")
+    foods_label.place(x=50, y=150)
+    foods_input = tk.Entry(settings)
+    foods_input.place(x=200, y=150)
+
+    # make slider for pheromone decay
+    pheromone_label = tk.Label(settings, text="Pheromone decay:")
+    pheromone_label.place(x=50, y=200)
+    pheromone_slider = tk.Scale(settings, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, slidelengthr=slider_length)
+    pheromone_slider.place(x=200, y=200)
+
+    # make slider for pheromone strength
+    strength_label = tk.Label(settings, text="Pheromone strength:")
+    strength_label.place(x=50, y=250)
+    strength_slider = tk.Scale(settings, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, sliderlength=slider_length)
+    strength_slider.place(x=200, y=250)
+
+    # make slider for pheromone radius
+    radius_label = tk.Label(settings, text="Pheromone radius:")
+    radius_label.place(x=50, y=300)
+    radius_slider = tk.Scale(settings, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, sliderlength=slider_length)
+    radius_slider.place(x=200, y=300)
 
     quit_button = tk.Button(settings, text="Quit", command=root.destroy)
     quit_button.place(x=100, y=400)
