@@ -27,6 +27,8 @@ colormap = {
     ANTWITHFOOD: [0, 0, 255]  # red
 }
 
+mapCopyPheromones = np.zeros((MAP_DIMENSIONS[0], MAP_DIMENSIONS[1], 1), dtype=np.uint8)
+
 # make a 500x500 grid in numpy
 mapGrid = np.zeros((MAP_DIMENSIONS[0], MAP_DIMENSIONS[1]))
 
@@ -58,47 +60,6 @@ def outOfBounds(x, y):
         return True
     return False
 
-def integer_points_on_line(x1, y1, x2, y2):
-    points = []
-    
-    # Calculate the differences between the x and y coordinates
-    dx = x2 - x1
-    dy = y2 - y1
-
-    # Determine the absolute values of the differences
-    dx_abs = abs(dx)
-    dy_abs = abs(dy)
-
-    # Determine the direction of movement along the x and y axes
-    sx = 1 if x1 < x2 else -1 if x1 > x2 else 0
-    sy = 1 if y1 < y2 else -1 if y1 > y2 else 0
-
-    # Initialize the decision parameters
-    decision = 2 * dy_abs - dx_abs
-
-    # Initial point
-    x = x1
-    y = y1
-
-    # Add the initial point to the list
-    points.append((x, y))
-
-    # Generate intermediate points
-    for _ in range(dx_abs):
-        if decision >= 0:
-            # Increment y for positive decision parameter
-            y += sy
-            decision -= 2 * dx_abs
-
-        # Increment x and update decision parameter
-        x += sx
-        decision += 2 * dy_abs
-
-        # Add the point to the list
-        points.append((x, y))
-
-    return points
-
 # Read file maze.png
 maze = cv2.imread("maze.png", cv2.IMREAD_GRAYSCALE)
 
@@ -128,7 +89,7 @@ class Simulation:
         self.pheromones = []
         self.ants = [Ant((5, 240), (5, 240)) for _ in range(antAmount)]
         self.iteration = 0
-        self.dx = 0.001
+        self.dx = 0.00
 
     def run(self):
         print("Running simulation")
@@ -137,11 +98,27 @@ class Simulation:
             start = time.time()
             self.updateAnts()
             self.updatePheromones()
+
+            mapCopy = np.copy(mapGrid)
+
+
+            for pheromone in Pheromones:
+                r = int(pheromone.radius * (pheromone.strength / pheromone.startStrength))
+                points = points_in_circle(pheromone.x, pheromone.y, r)
+                valid_points = points[(points[:, 0] < mapCopy.shape[0]) & (points[:, 1] < mapCopy.shape[1])]
+                valid_points = valid_points[mapGrid[valid_points[:, 0], valid_points[:, 1]] != WALL]
+                valid_points = valid_points[mapGrid[valid_points[:, 0], valid_points[:, 1]] != FOOD]
+                mapCopy[valid_points[:, 0], valid_points[:, 1]] = PHEROMONE
+
+            global mapCopyPheromones
+            mapCopyPheromones = np.copy(mapCopy)
             
-            self.updateScreen()
+            if self.dx > 0:
+                self.updateScreen()
             
             self.iteration += 1
-            print(time.time() - start, self.iteration, len(Pheromones))
+            if self.iteration % 1000 == 0:
+                print(time.time() - start, self.iteration, len(Pheromones))
             time.sleep(self.dx)
 
     def updateScreen(self):
@@ -161,7 +138,6 @@ class Simulation:
             color = ANT
             if ant.hasFood:
                 color = ANTWITHFOOD
-                # self.dx = 0.1
             mapCopy[int(ant.x)][int(ant.y)] = color
             if not outOfBounds(int(ant.x) + 1, int(ant.y) + 1):
                 mapCopy[int(ant.x) + 1][int(ant.y)] = color
@@ -182,6 +158,9 @@ class Simulation:
         for ant in self.ants:
             ant.doAction()
 
+            if ant.hasFood:
+                self.dx = 0.001
+
     def updatePheromones(self):
         for pheromone in Pheromones:
             pheromone.update()
@@ -198,7 +177,11 @@ class Ant:
         self.trackedFood = False
 
     def wander(self):
-        self.path.insert(0, (int(self.x), int(self.y)))
+        try:
+            test = self.path.index((int(self.x), int(self.y)))
+            self.path = self.path[:test]
+        except ValueError:
+            self.path.append((int(self.x), int(self.y)))
 
         newdirection = (self.direction + np.random.randint(-TURN_RADIUS//2, TURN_RADIUS//2)) % 360
         newx = self.x + np.cos(np.radians(newdirection))
@@ -222,9 +205,10 @@ class Ant:
     def backTrack(self):
         pathLen = len(self.path)
         if pathLen != self.pathIndex:
-            self.x = self.path[self.pathIndex][0]
-            self.y = self.path[self.pathIndex][1]
             self.pathIndex += 1
+            self.x = self.path[pathLen - self.pathIndex][0]
+            self.y = self.path[pathLen - self.pathIndex][1]
+            
         else:
             self.path = []
             self.pathIndex = 0
@@ -232,10 +216,11 @@ class Ant:
 
     def doAction(self):
         nearbyPheromones = []
-        for pheromone in Pheromones:
-            r = int(pheromone.radius * (pheromone.strength / pheromone.startStrength))
-            if np.sqrt((self.x - pheromone.x)**2 + (self.y - pheromone.y)**2) < r:
-                nearbyPheromones.append(pheromone)
+        if (mapCopyPheromones[int(self.x)][int(self.y)] == PHEROMONE):
+            for pheromone in Pheromones:
+                r = int(pheromone.radius * (pheromone.strength / pheromone.startStrength))
+                if np.sqrt((self.x - pheromone.x)**2 + (self.y - pheromone.y)**2) < r:
+                    nearbyPheromones.append(pheromone)
 
         if self.hasFood:
             self.backTrack()
@@ -253,7 +238,6 @@ class Ant:
             if self.trackedFood == False:
                 if self.pathToFood == [] and len(nearbyPheromones) > 0:
                     self.pathToFood = nearbyPheromones[0].pathToFood
-                    # self.path = nearbyPheromones[0].takeOverPath
                     self.trackedFood = True
                 else:
                     self.wander()
@@ -280,6 +264,7 @@ class Ant:
         if distance <= 1:
             # print("Reached point!")
             self.pathToFood.remove((x, y))
+            # del self.pathToFood[0]
             self.x = x
             self.y = y
         else:
@@ -289,13 +274,16 @@ class Ant:
             self.x += stepx
             self.y += stepy
 
-        self.path.insert(0, (int(self.x), int(self.y)))
+        try:
+            test = self.path.index((int(self.x), int(self.y)))
+            self.path = self.path[:test]
+        except ValueError:
+            self.path.append((int(self.x), int(self.y)))
 
     def dropPheromone(self):
-        pathToBase = self.path[self.pathIndex:]
-
-        pathToFood = self.path[0:self.pathIndex]
-        pathToFood.reverse()
+        pathToFood = self.path[len(self.path) - self.pathIndex:]
+        # pathToFood.reverse()
+        pathToBase = []
         Pheromones.append(Pheromone((int(self.x), int(self.y)), pathToFood, pathToBase))
 
 class Pheromone:
