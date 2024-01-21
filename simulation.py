@@ -7,7 +7,7 @@ TURN_RADIUS = 20
 PHEROMONE_RADIUS = 10
 MAP_DIMENSIONS = (500, 500)
 # Food is x, y, radius
-FOODS = {(400, 240, 5)}
+FOODS = {(220, 240, 5)}
 
 Pheromones = []
 
@@ -113,8 +113,8 @@ class Simulation:
             global mapCopyPheromones
             mapCopyPheromones = np.copy(mapCopy)
             
-            if self.dx > 0:
-                self.updateScreen()
+            # if self.dx > 0:
+            self.updateScreen()
             
             self.iteration += 1
             if self.iteration % 1000 == 0:
@@ -122,16 +122,8 @@ class Simulation:
             time.sleep(self.dx)
 
     def updateScreen(self):
-        mapCopy = np.copy(mapGrid)
+        mapCopy = np.copy(mapCopyPheromones)
 
-
-        for pheromone in Pheromones:
-            r = int(pheromone.radius * (pheromone.strength / pheromone.startStrength))
-            points = points_in_circle(pheromone.x, pheromone.y, r)
-            valid_points = points[(points[:, 0] < mapCopy.shape[0]) & (points[:, 1] < mapCopy.shape[1])]
-            valid_points = valid_points[mapGrid[valid_points[:, 0], valid_points[:, 1]] != WALL]
-            valid_points = valid_points[mapGrid[valid_points[:, 0], valid_points[:, 1]] != FOOD]
-            mapCopy[valid_points[:, 0], valid_points[:, 1]] = PHEROMONE
 
         # Draw ants thicc
         for ant in self.ants:
@@ -216,7 +208,7 @@ class Ant:
 
     def doAction(self):
         nearbyPheromones = []
-        if (mapCopyPheromones[int(self.x)][int(self.y)] == PHEROMONE):
+        if (mapCopyPheromones[int(self.x)][int(self.y)] == PHEROMONE) and not self.hasFood and not self.trackedFood:
             for pheromone in Pheromones:
                 r = int(pheromone.radius * (pheromone.strength / pheromone.startStrength))
                 if np.sqrt((self.x - pheromone.x)**2 + (self.y - pheromone.y)**2) < r:
@@ -224,7 +216,7 @@ class Ant:
 
         if self.hasFood:
             self.backTrack()
-            if len(nearbyPheromones) == 0:
+            if mapCopyPheromones[int(self.x)][int(self.y)] != PHEROMONE:
                 self.dropPheromone()
 
         if not self.hasFood:
