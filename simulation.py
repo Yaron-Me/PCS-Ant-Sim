@@ -1,11 +1,11 @@
 import numpy as np
 import time
 import cv2
-from ordered_set import OrderedSet
 
 TURN_RADIUS = 20
 PHEROMONE_RADIUS = 10
 MAP_DIMENSIONS = (500, 500)
+
 # Food is x, y, radius
 FOODS = {(220, 240, 5)}
 
@@ -27,11 +27,13 @@ colormap = {
     ANTWITHFOOD: [0, 0, 255]  # red
 }
 
+# Copy of the map with just the pheromnes and walls, no ants
 mapCopyPheromones = np.zeros((MAP_DIMENSIONS[0], MAP_DIMENSIONS[1], 1), dtype=np.uint8)
 
 # make a 500x500 grid in numpy
 mapGrid = np.zeros((MAP_DIMENSIONS[0], MAP_DIMENSIONS[1]))
 
+# This returns a list of points within a circle
 def points_in_circle(x, y, radius):
     # Generate a grid of integer points within a bounding box around the circle
     x_range = np.arange(int(x - radius), int(x + radius) + 1)
@@ -89,19 +91,21 @@ class Simulation:
         self.pheromones = []
         self.ants = [Ant((5, 240), (5, 240)) for _ in range(antAmount)]
         self.iteration = 0
-        self.dx = 0.00
+        self.dx = 0.001
 
     def run(self):
         print("Running simulation")
         while True:
             
             start = time.time()
+            # Make all the ants do an action
             self.updateAnts()
+            # lower strength of all pheromones
             self.updatePheromones()
 
             mapCopy = np.copy(mapGrid)
 
-
+            # draw pheromones into map (blue circles)
             for pheromone in Pheromones:
                 r = int(pheromone.radius * (pheromone.strength / pheromone.startStrength))
                 points = points_in_circle(pheromone.x, pheromone.y, r)
@@ -113,7 +117,7 @@ class Simulation:
             global mapCopyPheromones
             mapCopyPheromones = np.copy(mapCopy)
             
-            # if self.dx > 0:
+            # Update the screen, so draw ants and draw to screen
             self.updateScreen()
             
             self.iteration += 1
@@ -125,7 +129,7 @@ class Simulation:
         mapCopy = np.copy(mapCopyPheromones)
 
 
-        # Draw ants thicc
+        # Draw ants as 2x2 squares
         for ant in self.ants:
             color = ANT
             if ant.hasFood:
@@ -138,7 +142,7 @@ class Simulation:
 
 
         # Convert to 3 channel image
-        # unique_values = np.unique(mapCopy)
+        # Change single values to rgb values
         unique_values = np.array(list(colormap.keys()))
         rgb_lookup = np.array([colormap[val] for val in unique_values])
         colored_data = rgb_lookup[np.digitize(mapCopy, unique_values) - 1].astype(np.uint8)
@@ -149,9 +153,6 @@ class Simulation:
     def updateAnts(self):
         for ant in self.ants:
             ant.doAction()
-
-            if ant.hasFood:
-                self.dx = 0.001
 
     def updatePheromones(self):
         for pheromone in Pheromones:
@@ -169,6 +170,8 @@ class Ant:
         self.trackedFood = False
 
     def wander(self):
+        # Check if the ant has already been at this location,
+        # If so shorten the path it has taken
         try:
             test = self.path.index((int(self.x), int(self.y)))
             self.path = self.path[:test]
@@ -185,6 +188,7 @@ class Ant:
             newx = self.x + np.cos(np.radians(newdirection))
             newy = self.y + np.sin(np.radians(newdirection))
             tries += 1
+            # If ant cannot seem to get out of a wall, backtrack
             if tries > 100:
                 self.backTrack()
 
@@ -195,6 +199,7 @@ class Ant:
         
 
     def backTrack(self):
+        # This makes the ants take its recorded path back
         pathLen = len(self.path)
         if pathLen != self.pathIndex:
             self.pathIndex += 1
@@ -207,6 +212,7 @@ class Ant:
             self.hasFood = False
 
     def doAction(self):
+        # Get all the pheromones that are within the reach of an ant
         nearbyPheromones = []
         if (mapCopyPheromones[int(self.x)][int(self.y)] == PHEROMONE) and not self.hasFood and not self.trackedFood:
             for pheromone in Pheromones:
@@ -214,12 +220,15 @@ class Ant:
                 if np.sqrt((self.x - pheromone.x)**2 + (self.y - pheromone.y)**2) < r:
                     nearbyPheromones.append(pheromone)
 
+        # Go back to the nest if the ant has food
         if self.hasFood:
             self.backTrack()
             if mapCopyPheromones[int(self.x)][int(self.y)] != PHEROMONE:
                 self.dropPheromone()
 
+
         if not self.hasFood:
+            # If the ant is on a tile with food, pick it up
             if getTile(int(self.x), int(self.y)) == FOOD:
                 self.hasFood = True
                 self.trackedFood = False
@@ -227,6 +236,7 @@ class Ant:
                 setTile(int(self.x), int(self.y), EMPTY)
                 return
             
+            # If the ant was not following a pheromone, wander or try to find a pheromone
             if self.trackedFood == False:
                 if self.pathToFood == [] and len(nearbyPheromones) > 0:
                     self.pathToFood = nearbyPheromones[0].pathToFood
@@ -234,29 +244,23 @@ class Ant:
                 else:
                     self.wander()
             else:
+                # If the ant is following a pheromone, follow it
                 if len(self.pathToFood) > 0:
                     self.walkToFood()
                 else:
                     self.trackedFood = False
                     self.wander()
 
+    # Follow the path to the food given by a pheromone
     def walkToFood(self):
         (x, y) = self.pathToFood[0]
 
-        # print("pathToFood: ", self.pathToFood)
-
         distance = np.sqrt((self.x - x)**2 + (self.y - y)**2)
-
-        # print("Current: ", (self.x, self.y))
-        # print("Target: ", (x, y))
-        # print("Distance: ", distance)
 
         self.direction = np.degrees(np.arctan2(y - self.y, x - self.x))
         
         if distance <= 1:
-            # print("Reached point!")
             self.pathToFood.remove((x, y))
-            # del self.pathToFood[0]
             self.x = x
             self.y = y
         else:
@@ -266,15 +270,16 @@ class Ant:
             self.x += stepx
             self.y += stepy
 
+        # Check if the ant has already been at this location, if so shorten the path it has taken
         try:
             test = self.path.index((int(self.x), int(self.y)))
             self.path = self.path[:test]
         except ValueError:
             self.path.append((int(self.x), int(self.y)))
 
+    # Drop a pheromone at the current location
     def dropPheromone(self):
         pathToFood = self.path[len(self.path) - self.pathIndex:]
-        # pathToFood.reverse()
         pathToBase = []
         Pheromones.append(Pheromone((int(self.x), int(self.y)), pathToFood, pathToBase))
 
@@ -285,7 +290,6 @@ class Pheromone:
         self.strength = 800
         self.startStrength = self.strength
         self.pathToFood = pathToFood
-        # self.takeOverPath = takeOverPath
 
         # Check if wall is within radius
         xrange = np.arange(int(self.x - radius), int(self.x + radius) + 1)
@@ -306,6 +310,7 @@ class Pheromone:
                     if distance < lowest_radius:
                         lowest_radius = distance
 
+        # If the space to drop a pheromone is too small, don't drop it
         if lowest_radius < 5:
             self.strength = 0
 
