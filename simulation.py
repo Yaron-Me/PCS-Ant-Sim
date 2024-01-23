@@ -2,6 +2,14 @@ import numpy as np
 import time
 import cv2
 
+
+# changealbe parameters
+NUMBER_OF_ANTS = 100
+MAZE = "mazes/maze20x20.png"
+PHEROMONE_DECAY_RATE = 0.001
+WALKING_SPEED = 0.001
+
+# other parameters
 TURN_RADIUS = 20
 PHEROMONE_RADIUS = 10
 MAP_DIMENSIONS = (500, 500)
@@ -9,7 +17,7 @@ MAP_DIMENSIONS = (500, 500)
 # Food is x, y, radius
 FOODS = {(120, 240, 5)}
 global number_of_foods
-
+global start_time
 
 Pheromones = []
 
@@ -65,7 +73,7 @@ def outOfBounds(x, y):
     return False
 
 # Read file maze.png
-maze = cv2.imread("mazes/maze20x20.png", cv2.IMREAD_GRAYSCALE)
+maze = cv2.imread(MAZE, cv2.IMREAD_GRAYSCALE)
 
 # Rescale to 500x500
 maze = cv2.resize(maze, MAP_DIMENSIONS)
@@ -86,10 +94,9 @@ for food in FOODS:
     mapGrid[valid_points[:, 0], valid_points[:, 1]] = FOOD
     number_of_foods = len(valid_points)
 
-print("Number of foods: ", number_of_foods)
 
 class Simulation:
-    def __init__(self, mapDimensions = (500, 500), antAmount=100):
+    def __init__(self, mapDimensions = (500, 500), antAmount=NUMBER_OF_ANTS):
         self.mapDimensions = mapDimensions
         self.pheromones = []
         self.ants = [Ant((5, 240), (5, 240)) for _ in range(antAmount)]
@@ -97,7 +104,15 @@ class Simulation:
         self.dx = 0.001
 
     def run(self):
-        print("Running simulation")
+        global start_time
+        start_time = time.time()
+        print("Running simulation\n")
+        print("Test parameters:")
+        print("\tNumber of ants: \t", len(self.ants))
+        print("\tNumber of foods: \t", number_of_foods)
+        print("\tPheromone decay rate: ")
+        print("\tMap size: \t\t", MAP_DIMENSIONS)
+        print("\tWalking speed: \t\t", WALKING_SPEED)
         while True:
 
             start = time.time()
@@ -215,10 +230,12 @@ class Ant:
             self.hasFood = False
             # decrease value of number of foods
             global number_of_foods
+            global start_time
             number_of_foods -= 1
-            print("Number of foods left: ", number_of_foods)
+
             if number_of_foods == 0:
                 print("Simulation finished")
+                print("Simulation took", time.time() - start_time, "seconds")
                 exit()
 
     def doAction(self):
