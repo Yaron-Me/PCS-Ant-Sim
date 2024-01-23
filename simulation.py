@@ -7,7 +7,9 @@ PHEROMONE_RADIUS = 10
 MAP_DIMENSIONS = (500, 500)
 
 # Food is x, y, radius
-FOODS = {(220, 240, 5)}
+FOODS = {(120, 240, 5)}
+global number_of_foods
+
 
 Pheromones = []
 
@@ -82,11 +84,12 @@ for food in FOODS:
     # Set food where there are no walls
     valid_points = valid_points[mapGrid[valid_points[:, 0], valid_points[:, 1]] != WALL]
     mapGrid[valid_points[:, 0], valid_points[:, 1]] = FOOD
+    number_of_foods = len(valid_points)
 
+print("Number of foods: ", number_of_foods)
 
 class Simulation:
-    def __init__(self, mapDimensions = (500, 500), nestCoord = (250, 250),
-                 foodAmount=10, antAmount=100):
+    def __init__(self, mapDimensions = (500, 500), antAmount=100):
         self.mapDimensions = mapDimensions
         self.pheromones = []
         self.ants = [Ant((5, 240), (5, 240)) for _ in range(antAmount)]
@@ -210,6 +213,13 @@ class Ant:
             self.path = []
             self.pathIndex = 0
             self.hasFood = False
+            # decrease value of number of foods
+            global number_of_foods
+            number_of_foods -= 1
+            print("Number of foods left: ", number_of_foods)
+            if number_of_foods == 0:
+                print("Simulation finished")
+                exit()
 
     def doAction(self):
         # Get all the pheromones that are within the reach of an ant
