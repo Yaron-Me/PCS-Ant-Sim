@@ -63,7 +63,7 @@ def outOfBounds(x, y):
     return False
 
 # Read file maze.png
-maze = cv2.imread("maze.png", cv2.IMREAD_GRAYSCALE)
+maze = cv2.imread("mazes/maze20x20.png", cv2.IMREAD_GRAYSCALE)
 
 # Rescale to 500x500
 maze = cv2.resize(maze, MAP_DIMENSIONS)
@@ -96,7 +96,7 @@ class Simulation:
     def run(self):
         print("Running simulation")
         while True:
-            
+
             start = time.time()
             # Make all the ants do an action
             self.updateAnts()
@@ -116,10 +116,10 @@ class Simulation:
 
             global mapCopyPheromones
             mapCopyPheromones = np.copy(mapCopy)
-            
+
             # Update the screen, so draw ants and draw to screen
             self.updateScreen()
-            
+
             self.iteration += 1
             if self.iteration % 1000 == 0:
                 print(time.time() - start, self.iteration, len(Pheromones))
@@ -196,7 +196,7 @@ class Ant:
         self.y = newy
         self.direction = newdirection
 
-        
+
 
     def backTrack(self):
         # This makes the ants take its recorded path back
@@ -205,7 +205,7 @@ class Ant:
             self.pathIndex += 1
             self.x = self.path[pathLen - self.pathIndex][0]
             self.y = self.path[pathLen - self.pathIndex][1]
-            
+
         else:
             self.path = []
             self.pathIndex = 0
@@ -235,7 +235,7 @@ class Ant:
                 self.pathToFood = []
                 setTile(int(self.x), int(self.y), EMPTY)
                 return
-            
+
             # If the ant was not following a pheromone, wander or try to find a pheromone
             if self.trackedFood == False:
                 if self.pathToFood == [] and len(nearbyPheromones) > 0:
@@ -258,7 +258,7 @@ class Ant:
         distance = np.sqrt((self.x - x)**2 + (self.y - y)**2)
 
         self.direction = np.degrees(np.arctan2(y - self.y, x - self.x))
-        
+
         if distance <= 1:
             self.pathToFood.remove((x, y))
             self.x = x
