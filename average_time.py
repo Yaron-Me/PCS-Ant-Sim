@@ -40,7 +40,7 @@ def calculate_average_time(file_name):
             print(f"Results of {file_name}:")
             print(f"Average time total food retrieval: {average_column1} seconds")
             print(f"Average time first ant found food: {average_column2} seconds")
-            print(f"Average time total food retrieval after found is found: {average_column3} seconds")
+            print(f"Average time total food retrieval after food is found: {average_column3} seconds")
         else:
             print("No valid time values found in the file.")
 
