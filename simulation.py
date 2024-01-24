@@ -17,7 +17,8 @@ MAP_DIMENSIONS = (500, 500)
 # Food is x, y, radius
 FOODS = {(120, 240, 5)}
 global number_of_foods
-global start_time
+global start_number_of_foods
+global first_food
 
 Pheromones = []
 
@@ -93,6 +94,7 @@ for food in FOODS:
     valid_points = valid_points[mapGrid[valid_points[:, 0], valid_points[:, 1]] != WALL]
     mapGrid[valid_points[:, 0], valid_points[:, 1]] = FOOD
     number_of_foods = len(valid_points)
+    start_number_of_foods = number_of_foods
 
 
 class Simulation:
@@ -104,18 +106,9 @@ class Simulation:
         self.dx = 0.001
 
     def run(self):
-        global start_time
         start_time = time.time()
-        print("Running simulation\n")
-        print("Test parameters:")
-        print("\tNumber of ants: \t", len(self.ants))
-        print("\tNumber of foods: \t", number_of_foods)
-        print("\tPheromone decay rate: ")
-        print("\tMap size: \t\t", MAP_DIMENSIONS)
-        print("\tWalking speed: \t\t", WALKING_SPEED)
         while True:
 
-            start = time.time()
             # Make all the ants do an action
             self.updateAnts()
             # lower strength of all pheromones
@@ -139,9 +132,17 @@ class Simulation:
             self.updateScreen()
 
             self.iteration += 1
-            if self.iteration % 1000 == 0:
-                print(time.time() - start, self.iteration, len(Pheromones))
             time.sleep(self.dx)
+
+            global number_of_foods
+            if number_of_foods == 0:
+                total_time = (time.time() - start_time)
+                first_food_time = (first_food - start_time)
+                time_to_bring_food = (total_time - first_food_time)
+                print("total time: ", total_time)
+                print("first food: ", first_food_time)
+                print("time to bring food: ", time_to_bring_food)
+                exit()
 
     def updateScreen(self):
         mapCopy = np.copy(mapCopyPheromones)
@@ -223,20 +224,14 @@ class Ant:
             self.pathIndex += 1
             self.x = self.path[pathLen - self.pathIndex][0]
             self.y = self.path[pathLen - self.pathIndex][1]
-
         else:
             self.path = []
             self.pathIndex = 0
             self.hasFood = False
             # decrease value of number of foods
             global number_of_foods
-            global start_time
             number_of_foods -= 1
 
-            if number_of_foods == 0:
-                print("Simulation finished")
-                print("Simulation took", time.time() - start_time, "seconds")
-                exit()
 
     def doAction(self):
         # Get all the pheromones that are within the reach of an ant
@@ -257,6 +252,9 @@ class Ant:
         if not self.hasFood:
             # If the ant is on a tile with food, pick it up
             if getTile(int(self.x), int(self.y)) == FOOD:
+                if number_of_foods == start_number_of_foods:
+                    global first_food
+                    first_food = time.time()
                 self.hasFood = True
                 self.trackedFood = False
                 self.pathToFood = []
