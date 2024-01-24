@@ -6,7 +6,7 @@ import cv2
 # changealbe parameters
 NUMBER_OF_ANTS = 100
 MAZE = "mazes/maze20x20.png"
-PHEROMONE_DECAY_RATE = 0.001
+PHEROMONE_DECAY_RATE = 800 # in miliseconds
 WALKING_SPEED = 0.001
 
 # other parameters
@@ -313,7 +313,7 @@ class Pheromone:
     def __init__(self, coord, pathToFood, takeOverPath, radius=PHEROMONE_RADIUS):
         self.x = coord[0]
         self.y = coord[1]
-        self.strength = 800
+        self.strength = PHEROMONE_DECAY_RATE
         self.startStrength = self.strength
         self.pathToFood = pathToFood
 
