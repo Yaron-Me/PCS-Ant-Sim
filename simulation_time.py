@@ -88,7 +88,7 @@ for food in FOODS:
     mapGrid[valid_points[:, 0], valid_points[:, 1]] = FOOD
     number_of_foods = len(valid_points)
 
-print("Number of foods: ", number_of_foods)
+#print("Number of foods: ", number_of_foods)
 
 class Simulation:
     def __init__(self, mapDimensions = (500, 500), antAmount=100):
@@ -99,7 +99,7 @@ class Simulation:
         self.dx = 0.001
 
     def run(self):
-        print("Running simulation")
+        #print("Running simulation")
         #start = time.time()
         while True:
 
@@ -127,9 +127,17 @@ class Simulation:
             self.updateScreen()
 
             self.iteration += 1
-            if self.iteration % 1000 == 0:
-                print(time.time() - start, self.iteration, len(Pheromones))
-            time.sleep(self.dx)
+            #if self.iteration % 1000 == 0:
+                #print(time.time() - start, self.iteration, len(Pheromones))
+            #time.sleep(self.dx)
+
+            global number_of_foods
+            if number_of_foods == 0:
+                global start
+                self.total_time = (time.time() - start)
+                #print("Simulation finished")
+                print(self.total_time)
+                exit()
 
     def updateScreen(self):
         mapCopy = np.copy(mapCopyPheromones)
@@ -174,6 +182,7 @@ class Ant:
         self.hasFood = False
         self.pathToFood = []
         self.trackedFood = False
+        self.total_time = 0
 
     def wander(self):
         # Check if the ant has already been at this location,
@@ -219,13 +228,8 @@ class Ant:
             # decrease value of number of foods
             global number_of_foods
             number_of_foods -= 1
-            print("Number of foods left: ", number_of_foods)
+            #print("Number of foods left: ", number_of_foods)
             
-            if number_of_foods == 0:
-                global start
-                print("Simulation finished")
-                print(time.time() - start)
-                exit()
 
     def doAction(self):
         # Get all the pheromones that are within the reach of an ant
