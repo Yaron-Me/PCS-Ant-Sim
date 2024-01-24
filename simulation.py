@@ -139,9 +139,10 @@ class Simulation:
                 total_time = (time.time() - start_time)
                 first_food_time = (first_food - start_time)
                 time_to_bring_food = (total_time - first_food_time)
-                print("total time: ", total_time)
-                print("first food: ", first_food_time)
-                print("time to bring food: ", time_to_bring_food)
+                print(total_time, first_food_time, time_to_bring_food)
+                # print("total time: ", total_time)
+                # print("first food: ", first_food_time)
+                # print("time to bring food: ", time_to_bring_food)
                 exit()
 
     def updateScreen(self):
