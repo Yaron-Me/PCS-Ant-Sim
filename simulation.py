@@ -1,12 +1,28 @@
 import numpy as np
 import time
 import cv2
+import sys
 
 
-# changealbe parameters
-NUMBER_OF_ANTS = 100
-MAZE = "mazes/maze20x20.png"
-PHEROMONE_DECAY_RATE = 800 # in miliseconds
+# use arguments to change parameters
+if len(sys.argv) > 1 and len(sys.argv) < 4:
+    NUMBER_OF_ANTS = int(sys.argv[1])
+    if sys.argv[2] == "10":
+        MAZE = "mazes/maze10x10.png"
+    elif sys.argv[2] == "15":
+        MAZE = "mazes/maze15x15.png"
+    elif sys.argv[2] == "20":
+        MAZE = "mazes/maze20x20.png"
+    else:
+        print("Maze not found")
+        exit()
+else:
+    print("Usage: python3 simulation.py <number_of_ants> <maze>")
+    print("Example: python3 simulation.py 100 20")
+    exit()
+
+# important parameters
+PHEROMONE_DECAY_RATE = 480 # in seconds
 WALKING_SPEED = 0.28 #in m/s
 
 # other parameters
@@ -24,7 +40,6 @@ elif "20x20" in MAZE:
 
 global number_of_foods
 global start_number_of_foods
-global first_food
 
 Pheromones = []
 
@@ -148,12 +163,6 @@ class Simulation:
 
             global number_of_foods
             if number_of_foods == 0:
-                # realtime
-                # total_realtime = (time.time() - start_time)
-                # first_food_realtime = (first_food - start_time)
-                # realtime_to_bring_food = (total_realtime - first_food_realtime)
-                # print("realtime: ", total_realtime, first_food_realtime, realtime_to_bring_food)
-
                 # iterations
                 print(round((self.iteration / WALKING_SPEED), 2), round((self.first_food / WALKING_SPEED), 2), round((self.iteration - self.first_food) / WALKING_SPEED, 2))
                 exit()
@@ -162,7 +171,6 @@ class Simulation:
 
     def updateScreen(self):
         mapCopy = np.copy(mapCopyPheromones)
-
 
         # Draw ants as 2x2 squares
         for ant in self.ants:
@@ -269,8 +277,6 @@ class Ant:
             # If the ant is on a tile with food, pick it up
             if getTile(int(self.x), int(self.y)) == FOOD:
                 if number_of_foods == start_number_of_foods:
-                    global first_food
-                    first_food = time.time()
                     sim.set_iteration()
                 self.hasFood = True
                 self.trackedFood = False
