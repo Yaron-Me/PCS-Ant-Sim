@@ -126,7 +126,7 @@ class Simulation:
         self.iteration = 0
         self.first_food = 0
         self.dx = 0.001
-        self.visualization = True
+        self.visualization = False
 
     def set_iteration(self):
         self.first_food = self.iteration
