@@ -7,7 +7,7 @@ import cv2
 NUMBER_OF_ANTS = 100
 MAZE = "mazes/maze20x20.png"
 PHEROMONE_DECAY_RATE = 800 # in miliseconds
-WALKING_SPEED = 0.001
+WALKING_SPEED = 0.28
 
 # other parameters
 TURN_RADIUS = 20
