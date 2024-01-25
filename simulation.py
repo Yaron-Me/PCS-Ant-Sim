@@ -143,13 +143,15 @@ class Simulation:
             global number_of_foods
             if number_of_foods == 0:
                 # realtime
-                total_realtime = (time.time() - start_time)
-                first_food_realtime = (first_food - start_time)
-                realtime_to_bring_food = (total_realtime - first_food_realtime)
-                print("realtime: ", total_realtime, first_food_realtime, realtime_to_bring_food)
+                # total_realtime = (time.time() - start_time)
+                # first_food_realtime = (first_food - start_time)
+                # realtime_to_bring_food = (total_realtime - first_food_realtime)
+                # print("realtime: ", total_realtime, first_food_realtime, realtime_to_bring_food)
 
                 # iterations
-                print("iterations: ", self.iteration, self.first_food, self.iteration - self.first_food)
+                print(round((self.iteration / WALKING_SPEED), 2), round((self.first_food / WALKING_SPEED), 2), round((self.iteration - self.first_food) / WALKING_SPEED, 2))
+                exit()
+
                 exit()
 
     def updateScreen(self):
