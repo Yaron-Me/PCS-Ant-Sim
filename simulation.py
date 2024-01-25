@@ -105,6 +105,7 @@ class Simulation:
         self.iteration = 0
         self.first_food = 0
         self.dx = 0.001
+        self.visualization = False
 
     def set_iteration(self):
         self.first_food = self.iteration
@@ -131,12 +132,13 @@ class Simulation:
 
             global mapCopyPheromones
             mapCopyPheromones = np.copy(mapCopy)
-
-            # Update the screen, so draw ants and draw to screen
-            self.updateScreen()
+            
+            if self.visualization = True:
+                # Update the screen, so draw ants and draw to screen
+                self.updateScreen()
+                time.sleep(self.dx)
 
             self.iteration += 1
-            time.sleep(self.dx)
 
             global number_of_foods
             if number_of_foods == 0:
