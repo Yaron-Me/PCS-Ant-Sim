@@ -1,4 +1,4 @@
-file_names = ["20x20.txt"]  
+file_names = ["100_10x10.txt"]
 
 def calculate_average_time(file_name):
     total_time_1 = 0

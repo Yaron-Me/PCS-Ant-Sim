@@ -1,11 +1,11 @@
 import subprocess
 import threading
 
-RUNS = 14
-AVAILABLE_THREADS = 10
-OUTPUT_FILE = "output.txt"
+RUNS = 100
+AVAILABLE_THREADS = 15
 MAZE_SIZE = "10"
 ANT_AMOUNT = "100"
+OUTPUT_FILE = ANT_AMOUNT + "_" + MAZE_SIZE + "x" + MAZE_SIZE + ".txt"
 
 def run_simulation():
     output = subprocess.run(["python3", "simulation.py", ANT_AMOUNT, MAZE_SIZE], capture_output=True)
