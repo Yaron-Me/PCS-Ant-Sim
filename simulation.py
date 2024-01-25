@@ -133,7 +133,7 @@ class Simulation:
             global mapCopyPheromones
             mapCopyPheromones = np.copy(mapCopy)
             
-            if self.visualization = True:
+            if self.visualization == True:
                 # Update the screen, so draw ants and draw to screen
                 self.updateScreen()
                 time.sleep(self.dx)
