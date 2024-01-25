@@ -19,6 +19,7 @@ FOODS = {(120, 240, 5)}
 global number_of_foods
 global start_number_of_foods
 global first_food
+global first_food_iterations
 
 Pheromones = []
 
@@ -105,6 +106,9 @@ class Simulation:
         self.iteration = 0
         self.dx = 0.001
 
+    def get_iteration(self):
+        return self.iteration
+
     def run(self):
         start_time = time.time()
         while True:
@@ -135,14 +139,16 @@ class Simulation:
             time.sleep(self.dx)
 
             global number_of_foods
+            global first_food_iterations
             if number_of_foods == 0:
-                total_time = (time.time() - start_time)
-                first_food_time = (first_food - start_time)
-                time_to_bring_food = (total_time - first_food_time)
-                print(total_time, first_food_time, time_to_bring_food)
-                # print("total time: ", total_time)
-                # print("first food: ", first_food_time)
-                # print("time to bring food: ", time_to_bring_food)
+                # realtime
+                total_realtime = (time.time() - start_time)
+                first_food_realtime = (first_food - start_time)
+                realtime_to_bring_food = (total_realtime - first_food_realtime)
+                print("realtime: ", total_realtime, first_food_realtime, realtime_to_bring_food)
+
+                # iterations
+                print("iterations: ", self.iteration, first_food_iterations, self.iteration - first_food_iterations)
                 exit()
 
     def updateScreen(self):
@@ -255,7 +261,9 @@ class Ant:
             if getTile(int(self.x), int(self.y)) == FOOD:
                 if number_of_foods == start_number_of_foods:
                     global first_food
+                    global first_food_iterations
                     first_food = time.time()
+                    first_food_iterations = sim.get_iteration()
                 self.hasFood = True
                 self.trackedFood = False
                 self.pathToFood = []
