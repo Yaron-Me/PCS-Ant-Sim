@@ -15,7 +15,13 @@ PHEROMONE_RADIUS = 10
 MAP_DIMENSIONS = (500, 500)
 
 # Food is x, y, radius
-FOODS = {(120, 240, 5)}
+if "10x10" in MAZE:
+    FOODS = {(490, 275, 5)}
+elif "15x15" in MAZE:
+    FOODS = {(490, 250, 5)}
+elif "20x20" in MAZE:
+    FOODS = {(490, 262, 5)}
+
 global number_of_foods
 global start_number_of_foods
 global first_food
@@ -105,7 +111,7 @@ class Simulation:
         self.iteration = 0
         self.first_food = 0
         self.dx = 0.001
-        self.visualization = False
+        self.visualization = True
 
     def set_iteration(self):
         self.first_food = self.iteration
@@ -132,7 +138,7 @@ class Simulation:
 
             global mapCopyPheromones
             mapCopyPheromones = np.copy(mapCopy)
-            
+
             if self.visualization == True:
                 # Update the screen, so draw ants and draw to screen
                 self.updateScreen()
