@@ -3,13 +3,15 @@ import threading
 
 RUNS = 14
 AVAILABLE_THREADS = 10
-outputfile = "output.txt"
+OUTPUT_FILE = "output.txt"
+MAZE_SIZE = "10"
+ANT_AMOUNT = "100"
 
 def run_simulation():
-    output = subprocess.run(["python3", "simulation.py", "100", "10"], capture_output=True)
+    output = subprocess.run(["python3", "simulation.py", ANT_AMOUNT, MAZE_SIZE], capture_output=True)
     decoded_output = output.stdout.decode("utf-8")
     # Write output to file
-    with open(outputfile, "a") as f:
+    with open(OUTPUT_FILE, "a") as f:
         f.write(decoded_output)
 
 if __name__ == "__main__":
