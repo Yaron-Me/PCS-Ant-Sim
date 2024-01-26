@@ -1,10 +1,11 @@
 import subprocess
 import threading
+import playsound
 
-RUNS = 100
+RUNS = 0
 AVAILABLE_THREADS = 15
 MAZE_SIZE = "10"
-ANT_AMOUNT = "100"
+ANT_AMOUNT = "10"
 OUTPUT_FILE = ANT_AMOUNT + "_" + MAZE_SIZE + "x" + MAZE_SIZE + ".txt"
 
 def run_simulation():
@@ -38,3 +39,6 @@ if __name__ == "__main__":
 
         if len(inactive_threads) == 0 and len(active_threads) == 0:
             break
+
+    # Play a sound to notify that the simulation is done
+    playsound.playsound("alarm.mp3")
