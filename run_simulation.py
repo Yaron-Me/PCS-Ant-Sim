@@ -2,11 +2,12 @@ import subprocess
 import threading
 import playsound
 
-RUNS = 0
+RUNS = 100
 AVAILABLE_THREADS = 15
-MAZE_SIZE = "10"
-ANT_AMOUNT = "10"
+MAZE_SIZE = "20"
+ANT_AMOUNT = "200"
 OUTPUT_FILE = ANT_AMOUNT + "_" + MAZE_SIZE + "x" + MAZE_SIZE + ".txt"
+
 
 def run_simulation():
     output = subprocess.run(["python3", "simulation.py", ANT_AMOUNT, MAZE_SIZE], capture_output=True)
@@ -15,6 +16,7 @@ def run_simulation():
     with open(OUTPUT_FILE, "a") as f:
         f.write(decoded_output)
 
+
 if __name__ == "__main__":
     inactive_threads = []
     active_threads = []
@@ -22,7 +24,6 @@ if __name__ == "__main__":
         thread = threading.Thread(target=run_simulation)
         thread.daemon = True
         inactive_threads.append((thread, i))
-
 
     while True:
         if len(active_threads) < AVAILABLE_THREADS and len(inactive_threads) > 0:

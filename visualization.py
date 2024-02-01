@@ -1,30 +1,56 @@
+import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 
-# 1) Total time, 2) First ant found food time, 3) Retrieval time after first food is found
-# Still need to fill in values manually, can make it automatic
-file_data = [
-    ("20x20", 48.123, 15.678, 33.890), 
-    ("15x15", 40.456, 12.765, 28.012),  
-]
+plt.rc('font', size=20)
 
-file_names = [data[0] for data in file_data]
-total_times = [data[1] for data in file_data]
-first_ant_times = [data[2] for data in file_data]
-retrieval_times = [data[3] for data in file_data]
+filenames = []
 
-bar_width = 0.2
-index = range(len(file_names))
+antamounts = ["10", "25", "50", "100", "500", "1000"]
 
-plt.figure(figsize=(12, 6))
-plt.bar(index, total_times, bar_width, label='Total Time', color='skyblue')
-plt.bar([i + bar_width for i in index], first_ant_times, bar_width, label='First Ant Found Time', color='lightcoral')
-plt.bar([i + 2 * bar_width for i in index], retrieval_times, bar_width, label='Retrieval Time After Food Found Time', color='lightgreen')
+# Create subplots for each maze size
+fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharey=True)
 
-plt.xlabel('Maze size')
-plt.ylabel('Time (seconds)')
-plt.title('Ant colony food retrieval')
-plt.xticks([i + bar_width for i in index], file_names)
-plt.legend()
+maze_sizes = ["10x10", "15x15", "20x20"]
 
+for idx, mazesize in enumerate(maze_sizes):
+    totalstimes = []
+
+    for antsize in antamounts:
+        filename = "results/" + antsize + "_" + mazesize + ".txt"
+
+        with open(filename, "r") as f:
+            totals = []
+
+            lines = f.readlines()
+            for line in lines:
+                [total, _, _] = line.split(" ")
+                totals.append(float(total))
+
+            totals = np.array(totals)
+
+            totalstimes.append(totals)
+
+    totalstimes = np.array(totalstimes)
+    # convert from seconds to hours
+    totalstimes /= 3600
+    avgtimes = np.average(totalstimes, axis=1)
+    print(mazesize, avgtimes)
+    std_err = np.std(totalstimes, axis=1) / np.sqrt(totalstimes.shape[1])
+
+    # Create violin plot on each subplot
+    axes[idx].violinplot(totalstimes.T, showmeans=True)
+    axes[idx].set_xticks(np.arange(1, len(antamounts) + 1))
+    axes[idx].set_xticklabels(antamounts)
+    axes[idx].set_xlabel("Ant Colony Size")
+    axes[idx].set_ylabel("Time in hours")
+    axes[idx].set_title(f"Maze Size: {mazesize}")
+
+    # Add error bars for standard error
+    for i, (avg, err) in enumerate(zip(avgtimes, std_err)):
+        axes[idx].errorbar(i + 1, avg, yerr=err, fmt='none', color='black', capsize=5)
+
+# Adjust layout
 plt.tight_layout()
+plt.suptitle("Violin Plots of Average Time with Standard Error for Different Maze Sizes", y=1.05)
 plt.show()

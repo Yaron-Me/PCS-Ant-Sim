@@ -3,7 +3,6 @@ import time
 import cv2
 import sys
 
-
 # use arguments to change parameters
 if len(sys.argv) > 1 and len(sys.argv) < 4:
     NUMBER_OF_ANTS = int(sys.argv[1])
@@ -22,8 +21,8 @@ else:
     exit()
 
 # important parameters
-PHEROMONE_DECAY_RATE = 480 # in seconds
-WALKING_SPEED = 0.28 #in m/s
+PHEROMONE_DECAY_RATE = 480  # in seconds
+WALKING_SPEED = 0.28  # in m/s
 
 # other parameters
 TURN_RADIUS = 20
@@ -43,12 +42,12 @@ global start_number_of_foods
 
 Pheromones = []
 
-EMPTY = 0 # white
-WALL = 1 # black
-FOOD = 2 # green
-ANT = 3 # black
-PHEROMONE = 4 # black
-ANTWITHFOOD = 5 # red
+EMPTY = 0  # white
+WALL = 1  # black
+FOOD = 2  # green
+ANT = 3  # black
+PHEROMONE = 4  # black
+ANTWITHFOOD = 5  # red
 
 colormap = {
     EMPTY: [255, 255, 255],  # white
@@ -64,6 +63,7 @@ mapCopyPheromones = np.zeros((MAP_DIMENSIONS[0], MAP_DIMENSIONS[1], 1), dtype=np
 
 # make a 500x500 grid in numpy
 mapGrid = np.zeros((MAP_DIMENSIONS[0], MAP_DIMENSIONS[1]))
+
 
 # This returns a list of points within a circle
 def points_in_circle(x, y, radius):
@@ -82,17 +82,21 @@ def points_in_circle(x, y, radius):
 
     return points_within_circle
 
+
 def getTile(x, y):
     return mapGrid[x][y]
 
+
 def setTile(x, y, value):
     mapGrid[x][y] = value
+
 
 def outOfBounds(x, y):
     if x < 0 or x >= MAP_DIMENSIONS[0] or \
        y < 0 or y >= MAP_DIMENSIONS[1]:
         return True
     return False
+
 
 # Read file maze.png
 maze = cv2.imread(MAZE, cv2.IMREAD_GRAYSCALE)
@@ -119,7 +123,7 @@ for food in FOODS:
 
 
 class Simulation:
-    def __init__(self, mapDimensions = (500, 500), antAmount=NUMBER_OF_ANTS):
+    def __init__(self, mapDimensions=(500, 500), antAmount=NUMBER_OF_ANTS):
         self.mapDimensions = mapDimensions
         self.pheromones = []
         self.ants = [Ant((5, 240), (5, 240)) for _ in range(antAmount)]
@@ -132,7 +136,6 @@ class Simulation:
         self.first_food = self.iteration
 
     def run(self):
-        start_time = time.time()
         while True:
 
             # Make all the ants do an action
@@ -154,7 +157,7 @@ class Simulation:
             global mapCopyPheromones
             mapCopyPheromones = np.copy(mapCopy)
 
-            if self.visualization == True:
+            if self.visualization:
                 # Update the screen, so draw ants and draw to screen
                 self.updateScreen()
                 time.sleep(self.dx)
@@ -165,8 +168,6 @@ class Simulation:
             if number_of_foods == 0:
                 # iterations
                 print(round((self.iteration / WALKING_SPEED), 2), round((self.first_food / WALKING_SPEED), 2), round((self.iteration - self.first_food) / WALKING_SPEED, 2))
-                exit()
-
                 exit()
 
     def updateScreen(self):
@@ -182,7 +183,6 @@ class Simulation:
                 mapCopy[int(ant.x) + 1][int(ant.y)] = color
                 mapCopy[int(ant.x)][int(ant.y) + 1] = color
                 mapCopy[int(ant.x) + 1][int(ant.y) + 1] = color
-
 
         # Convert to 3 channel image
         # Change single values to rgb values
@@ -200,6 +200,7 @@ class Simulation:
     def updatePheromones(self):
         for pheromone in Pheromones:
             pheromone.update()
+
 
 class Ant:
     def __init__(self, coord, nest):
@@ -221,7 +222,7 @@ class Ant:
         except ValueError:
             self.path.append((int(self.x), int(self.y)))
 
-        newdirection = (self.direction + np.random.randint(-TURN_RADIUS//2, TURN_RADIUS//2)) % 360
+        newdirection = (self.direction + np.random.randint(-TURN_RADIUS // 2, TURN_RADIUS // 2)) % 360
         newx = self.x + np.cos(np.radians(newdirection))
         newy = self.y + np.sin(np.radians(newdirection))
 
@@ -239,8 +240,6 @@ class Ant:
         self.y = newy
         self.direction = newdirection
 
-
-
     def backTrack(self):
         # This makes the ants take its recorded path back
         pathLen = len(self.path)
@@ -255,7 +254,6 @@ class Ant:
             # decrease value of number of foods
             global number_of_foods
             number_of_foods -= 1
-
 
     def doAction(self):
         # Get all the pheromones that are within the reach of an ant
@@ -272,7 +270,6 @@ class Ant:
             if mapCopyPheromones[int(self.x)][int(self.y)] != PHEROMONE:
                 self.dropPheromone()
 
-
         if not self.hasFood:
             # If the ant is on a tile with food, pick it up
             if getTile(int(self.x), int(self.y)) == FOOD:
@@ -285,7 +282,7 @@ class Ant:
                 return
 
             # If the ant was not following a pheromone, wander or try to find a pheromone
-            if self.trackedFood == False:
+            if not self.trackedFood:
                 if self.pathToFood == [] and len(nearbyPheromones) > 0:
                     self.pathToFood = nearbyPheromones[0].pathToFood
                     self.trackedFood = True
@@ -331,6 +328,7 @@ class Ant:
         pathToBase = []
         Pheromones.append(Pheromone((int(self.x), int(self.y)), pathToFood, pathToBase))
 
+
 class Pheromone:
     def __init__(self, coord, pathToFood, takeOverPath, radius=PHEROMONE_RADIUS):
         self.x = coord[0]
@@ -368,8 +366,6 @@ class Pheromone:
         self.strength -= 1
         if self.strength <= 0:
             Pheromones.remove(self)
-
-
 
 
 sim = Simulation()

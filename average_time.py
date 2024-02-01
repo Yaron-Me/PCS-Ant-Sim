@@ -1,4 +1,5 @@
-file_names = ["100_10x10.txt"]
+file_names = ["results/200_20x20.txt"]
+
 
 def calculate_average_time(file_name):
     total_time_1 = 0
@@ -32,9 +33,9 @@ def calculate_average_time(file_name):
             average_column3 = total_time_3 / count
 
             # Round the averages to 3 decimal places
-            average_column1 = round(average_column1, 3)
-            average_column2 = round(average_column2, 3)
-            average_column3 = round(average_column3, 3)
+            average_column1 = round(average_column1 / 3600, 3)
+            average_column2 = round(average_column2 / 3600, 3)
+            average_column3 = round(average_column3 / 3600, 3)
 
             # Print the averages with appropriate labels
             print(f"Results of {file_name}:")
@@ -46,6 +47,7 @@ def calculate_average_time(file_name):
 
     except FileNotFoundError:
         print(f"File not found: {file_name}")
+
 
 # Calculate and print average times for each file
 for file_name in file_names:
