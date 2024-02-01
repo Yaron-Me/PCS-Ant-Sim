@@ -9,6 +9,7 @@ ANT_AMOUNT = "200"
 OUTPUT_FILE = ANT_AMOUNT + "_" + MAZE_SIZE + "x" + MAZE_SIZE + ".txt"
 
 
+# Run the simulation and write the output to a file
 def run_simulation():
     output = subprocess.run(["python3", "simulation.py", ANT_AMOUNT, MAZE_SIZE], capture_output=True)
     decoded_output = output.stdout.decode("utf-8")
@@ -17,6 +18,7 @@ def run_simulation():
         f.write(decoded_output)
 
 
+# Start the simulation in multiple threads
 if __name__ == "__main__":
     inactive_threads = []
     active_threads = []
