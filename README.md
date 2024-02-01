@@ -5,7 +5,9 @@ A simple ant simulation in a maze.
 
 ## Usage
 ### Executing the simulation
-`python3 simualtion.py`
+`python3 simualtion.py <number of ants> <maze size>`
+### Example
+`python3 simualtion.py 100 10`
 
 ### Generate your own maze
 Go to [this](https://mazegenerator.net) site and download the generated maze.
