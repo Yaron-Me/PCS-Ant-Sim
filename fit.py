@@ -66,7 +66,7 @@ plt.scatter(additional_antamounts, predictions_10x10, marker='x', color='red', l
 plt.scatter(additional_antamounts, predictions_15x15, marker='x', color='green', label="Predicted 15x15")
 plt.scatter(additional_antamounts, predictions_20x20, marker='x', color='blue', label="Predicted 20x20")
 
-plt.xlabel("Antamount")
-plt.ylabel("Time")
+plt.xlabel("Ant Colony Size")
+plt.ylabel("Time in hours")
 plt.legend()
 plt.show()
