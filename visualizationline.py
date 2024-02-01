@@ -1,8 +1,9 @@
+# This script plots the average time taken to reach each criteria for different ant colony sizes
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 plt.rc('font', size=18)
-# plt.subplots_adjust(right=5)
 
 antamounts = ["10", "25", "50", "100", "500", "1000"]
 

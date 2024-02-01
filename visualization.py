@@ -1,3 +1,5 @@
+# This script plots the average time taken to solve a maze for different ant colony sizes
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
