@@ -1,3 +1,5 @@
+# This script fits a reciprocal function to the data and plots the fitted curve and the original data points
+
 import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
